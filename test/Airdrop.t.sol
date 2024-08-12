@@ -9,7 +9,6 @@ import {Deploy} from "../script/Deploy.s.sol";
 import {ZkSyncChainChecker} from "foundry-devops/src/ZkSyncChainChecker.sol";
 
 contract AirdropTest is Test, ZkSyncChainChecker {
-
     Airdrop airdrop;
     Token token;
     address gasPayer;
@@ -25,7 +24,7 @@ contract AirdropTest is Test, ZkSyncChainChecker {
     bytes32[] proof = [proofOne, proofTwo];
 
     function setUp() public {
-        if(!isZkSyncChain()) {
+        if (!isZkSyncChain()) {
             Deploy deployer = new Deploy();
             (airdrop, token) = deployer.deployAirdrop();
         } else {
@@ -39,10 +38,21 @@ contract AirdropTest is Test, ZkSyncChainChecker {
         (user, userPrivateKey) = makeAddrAndKey("user");
     }
 
-    function signMessage(uint256 privateKey, address account) public view returns(uint8 v, bytes32 r, bytes32 s) {
+    function signMessage(uint256 privateKey, address account) public view returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 hashedMessage = airdrop.getMessageHash(account, amount);
         (v, r, s) = vm.sign(privateKey, hashedMessage);
     }
 
-    function testUsersCanClaim() public {}
+    function testUsersCanClaim() public {
+        uint256 startingBalance = token.balanceOf(user);
+        vm.startPrank(user);
+        (uint8 v, bytes32 r, bytes32 s) = signMessage(userPrivateKey, user);
+        vm.stopPrank();
+
+        vm.prank(gasPayer);
+        airdrop.claim(user, amount, proof, v, r, s);
+        uint256 endingBalance = token.balanceOf(user);
+        console.log("ending balance: &d", endingBalance);
+        assertEq(endingBalance - startingBalance, amount);
+    }
 }
