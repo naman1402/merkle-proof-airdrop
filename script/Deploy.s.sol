@@ -6,6 +6,7 @@ import {Airdrop, IERC20} from "../src/Airdrop.sol";
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 
+// Deploy Airdrop contract and Token, mint to the owner (this contract) and transfer it to airdrop contract.
 contract Deploy is Script {
     bytes32 public ROOT = 0xaa5d581231e596618465a56aa0f5870ba6e20785fe436d5bfb82b08662ccc7c4;
     uint256 public AMOUNT = 5 * (25 * 1e18); // 5 users, 25 tokens each
